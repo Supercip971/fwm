@@ -2,7 +2,12 @@
 #include "utility.h"
 #include <X11/X.h>
 #include <X11/Xlib.h>
+#include <X11/Xos.h>
+#include <X11/Xresource.h>
 #include <X11/Xutil.h>
+#include <X11/extensions/shape.h>
+#include <X11/keysym.h>
+
 #include <memory>
 #include <stdlib.h>
 
@@ -74,6 +79,7 @@ namespace feather
     }
     void fwm::frame_window(Window wid)
     {
+        int b_width = 2;
         if (frame_list.count(wid))
         {
             return; // already framed
@@ -121,6 +127,7 @@ namespace feather
 
         return true;
     }
+
     bool fwm::create_event(const XConfigureRequestEvent the_event)
     {
 
@@ -142,7 +149,55 @@ namespace feather
         XConfigureWindow(current_display, the_event.window, the_event.value_mask, &end_window);
         return true;
     }
-    bool fwm::interpret_event(const XEvent the_event)
+
+    bool fwm::on_motion_event(const XMotionEvent &event)
+    {
+        if (!frame_list.count(event.window))
+        {
+            return true;
+        }
+        const Window frame = frame_list[event.window];
+        pos final = {event.x_root, event.y_root};
+        final.x -= last_mouse_click.x;
+        final.y -= last_mouse_click.y;
+        if (event.state & move_button_mask)
+        {
+
+            final.x += last_focused_window.x;
+            final.y += last_focused_window.y;
+            XMoveWindow(current_display, frame, final.x, final.y);
+        }
+        else if (event.state & resize_button_mask)
+        {
+
+            pos resize_change = {
+                std::max(final.x + last_focused_window.width, 1),
+                std::max(final.y + last_focused_window.height, 1)};
+            pos dest_new_size = {resize_change.x, resize_change.y};
+            XResizeWindow(current_display, event.window, dest_new_size.x, dest_new_size.y);
+            XResizeWindow(current_display, frame, dest_new_size.x, dest_new_size.y);
+        }
+        else
+        {
+            context.generate_error("not valid event motion received :^( %i", event.state);
+        }
+        return true;
+    }
+
+    bool fwm::on_button_event(const XButtonEvent &event)
+    {
+        if (!frame_list.count(event.window))
+        {
+            return true;
+        }
+        const Window targeted = frame_list[event.window];
+
+        last_mouse_click = {event.x_root, event.y_root};
+        XRaiseWindow(current_display, targeted);
+        XGetWindowAttributes(current_display, targeted, &last_focused_window);
+        return true;
+    }
+    bool fwm::interpret_event(XEvent the_event)
     {
 
         switch (the_event.type)
@@ -155,6 +210,16 @@ namespace feather
             break;
         case UnmapNotify:
             return unmap_request_event(the_event.xunmap);
+            break;
+        case MotionNotify:
+            while (XCheckTypedWindowEvent(current_display, the_event.xmotion.window, MotionNotify, &the_event))
+            {
+                // skip pending operation
+            }
+            return on_motion_event(the_event.xmotion);
+            break;
+        case ButtonPress:
+            return on_button_event(the_event.xbutton);
             break;
         default:
             break;
