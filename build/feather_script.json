@@ -1,0 +1,15 @@
+{
+    "fwm_version": 1,
+    "fwm_tick_delay": 0.1,
+    "fwm_key" : {
+        "mod": "menu",
+        "fwm_key2" : {
+            "mod2" : "menu",
+            "mod4" : "dmenu",
+            "fwm_tick_delaya" : 1.1,
+            "fwm_tick_delayb" : 3
+        }
+    },
+    "test":"hello"
+
+}

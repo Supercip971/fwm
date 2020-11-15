@@ -42,7 +42,7 @@ namespace feather
 
             error = true;
 
-            char *target = new char[strlen(message) + 20];
+            char *target = new char[strlen(message) + 128];
             vsprintf(target, message, vl);
 
             fprintf(output, "\033[1;36m[ FWM ]\033[0m %s  \n",
