@@ -74,8 +74,7 @@ namespace feather
     }
     void fwm::frame_window(Window wid)
     {
-        int b_width = 1;
-        if (!frame_list.count(wid))
+        if (frame_list.count(wid))
         {
             return; // already framed
         }
