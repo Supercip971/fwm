@@ -28,7 +28,7 @@ namespace feather
         bool interpret_event(const XEvent the_event);
 
     private:
-        unsigned int mod_code = Mod1Mask;     // alt
+        unsigned int mod_code =  Mod4Mask;     // windows
         unsigned int move_button = Button1;   // left click
         unsigned int resize_button = Button3; // right click
         unsigned int kill_window_key = XK_F4; // f4
