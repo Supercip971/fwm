@@ -7,7 +7,8 @@
 #include <unordered_map>
 namespace feather
 {
-    struct pos{
+    struct pos
+    {
         int x;
         int y;
     };
@@ -29,16 +30,16 @@ namespace feather
         bool map_request_event(const XMapRequestEvent event);
         bool unmap_request_event(const XUnmapEvent &event);
         bool on_motion_event(const XMotionEvent &event);
-        bool on_button_event(const XButtonEvent & event);
+        bool on_button_event(const XButtonEvent &event);
         bool interpret_event(XEvent the_event);
 
     private:
-        unsigned int mod_code =  Mod4Mask;     // windows
-        unsigned int move_button = Button1;   // left click
+        unsigned int mod_code = Mod4Mask;              // windows
+        unsigned int move_button = Button1;            // left click
         unsigned int move_button_mask = Button1Mask;   // left click
-        unsigned int resize_button = Button3; // right click
-        unsigned int resize_button_mask = Button3Mask;   // left click
-        unsigned int kill_window_key = XK_F4; // f4
+        unsigned int resize_button = Button3;          // right click
+        unsigned int resize_button_mask = Button3Mask; // left click
+        unsigned int kill_window_key = XK_F4;          // f4
         unsigned int switch_window = XK_Tab;
         Display *current_display;
         Window main_window;
