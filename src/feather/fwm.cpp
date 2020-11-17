@@ -13,6 +13,49 @@
 
 namespace feather
 {
+
+    const char* event_string_list[] = {
+        "null",
+        "null",
+        "key press",
+        "key release",
+        "button press",
+        "button release",
+        "enter notify",
+        "leave notify",
+        "focus in",
+        "focus out",
+        "keymap notify",
+        "expose",
+        "graphics expose",
+        "no expose",
+        "visibility notify",
+        "create notify",
+        "destroy notify",
+        "unmap notify",
+        "map notify",
+        "map request",
+        "reparent notify",
+        "configure notify",
+        "configure request",
+        "null",
+        "null",
+        "null",
+        "null",
+        "null",
+        "null",
+        "null",
+        "null",
+        "null",
+        "null",
+        "null",
+        "null",
+        "null",
+        "null",
+        "null",
+        "null",
+        "null",
+    };
     fwm main_fwm;
     fwm *fwm::the()
     {
@@ -90,7 +133,7 @@ namespace feather
         XGetWindowAttributes(current_display, wid, &x_attributes);
 
         Window on_top = XCreateSimpleWindow(current_display, main_window, x_attributes.x, x_attributes.y, x_attributes.width, x_attributes.height, b_width, BORDER_COLOR, BG_COLOR);
-
+        
         XSelectInput(current_display, on_top, SubstructureRedirectMask | SubstructureNotifyMask);
         XAddToSaveSet(current_display, wid);
         XReparentWindow(current_display, wid, on_top, 0, 0);
@@ -211,6 +254,12 @@ namespace feather
         case UnmapNotify:
             return unmap_request_event(the_event.xunmap);
             break;
+        case ButtonRelease:
+            return true;
+            break;
+        case ConfigureNotify:
+            return true;
+            break;
         case MotionNotify:
             while (XCheckTypedWindowEvent(current_display, the_event.xmotion.window, MotionNotify, &the_event))
             {
@@ -225,7 +274,7 @@ namespace feather
             break;
         }
 
-        context.generate_error("unhandled event : %i ", the_event.type);
+        context.generate_error("unhandled event : %s ",event_string_list[ the_event.type]);
         return true;
     }
     void fwm::init_top_window()
