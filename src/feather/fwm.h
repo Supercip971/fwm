@@ -1,9 +1,9 @@
 #pragma once
 
-#include <X11/X.h>
-#include <X11/Xlib.h>
 #include "ftwm.h"
 #include "ftype.h"
+#include <X11/X.h>
+#include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <mutex>
 #include <unistd.h>
@@ -38,7 +38,8 @@ namespace feather
         bool on_motion_event(const XMotionEvent &event);
         bool on_button_event(const XButtonEvent &event);
         bool interpret_event(XEvent the_event);
-        bool on_key_press(const XKeyEvent& event);
+        bool on_key_press(const XKeyEvent &event);
+
     private:
         unsigned int mod_code = Mod4Mask;              // windows
         unsigned int move_button = Button1;            // left click
@@ -47,7 +48,7 @@ namespace feather
         unsigned int resize_button_mask = Button3Mask; // left click
         unsigned int kill_window_key = XK_F4;          // f4
         unsigned int switch_window = XK_Tab;
-        unsigned int window_full_screen =XK_space;
+        unsigned int window_full_screen = XK_space;
         KeyCode window_full_screen_raw;
         Display *current_display;
         Window main_window;

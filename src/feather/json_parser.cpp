@@ -28,8 +28,8 @@ namespace feather
     {
         if (type == JSON_STRING)
         {
-            char *data = new char[strlen(vdata)+2];
-            std::memcpy(data, vdata + 1, strlen(vdata )- 2);
+            char *data = new char[strlen(vdata) + 2];
+            std::memcpy(data, vdata + 1, strlen(vdata) - 2);
             data[strlen(vdata)] = 0;
             std::string ret = data;
             delete[] data;

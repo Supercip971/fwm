@@ -16,7 +16,7 @@ namespace feather
 {
 
     std::mutex main_mutex;
-    const char* event_string_list[] = {
+    const char *event_string_list[] = {
         "null",
         "null",
         "key press",
@@ -145,7 +145,7 @@ namespace feather
         XGetWindowAttributes(current_display, wid, &x_attributes);
 
         Window on_top = XCreateSimpleWindow(current_display, main_window, x_attributes.x, x_attributes.y, x_attributes.width, x_attributes.height, b_width, BORDER_COLOR, BG_COLOR);
-        
+
         XSelectInput(current_display, on_top, SubstructureRedirectMask | SubstructureNotifyMask);
         XAddToSaveSet(current_display, wid);
         XReparentWindow(current_display, wid, on_top, 0, 0);
@@ -207,23 +207,31 @@ namespace feather
         return true;
     }
 
-        bool fwm::on_key_press(const XKeyEvent& event){
-            if(event.keycode ==window_full_screen_raw){
-                context.log("event %x \n", event.keycode);
-                if(frame_list[event.window].full_screen){
-                    frame_list[event.window].full_screen = false;
-                }
-                else {
-                    frame_list[event.window].full_screen = true;
-                }
-            }else{
-
-                context.log("nevent %x \n", event.keycode);
-                context.log("nstate %x \n", event.state);
-                context.log("should %x \n", window_full_screen_raw);
+    bool fwm::on_key_press(const XKeyEvent &event)
+    {
+        if (event.keycode == window_full_screen_raw)
+        {
+            context.log("event %x \n", event.keycode);
+            if (frame_list[event.window].full_screen)
+            {
+                frame_list[event.window].full_screen = false;
             }
-            return true;
+            else
+            {
+                frame_list[event.window].full_screen = true;
+            }
+
+            frame_list[event.window].has_changed = true;
         }
+        else
+        {
+
+            context.log("nevent %x \n", event.keycode);
+            context.log("nstate %x \n", event.state);
+            context.log("should %x \n", window_full_screen_raw);
+        }
+        return true;
+    }
     bool fwm::on_motion_event(const XMotionEvent &event)
     {
         if (!frame_list.count(event.window))
@@ -246,8 +254,8 @@ namespace feather
         {
 
             pos resize_change = {
-            std::max(final.x + last_focused_window.width, 1),
-            std::max(final.y + last_focused_window.height, 1)};
+                std::max(final.x + last_focused_window.width, 1),
+                std::max(final.y + last_focused_window.height, 1)};
             pos dest_new_size = {resize_change.x, resize_change.y};
             XResizeWindow(current_display, event.window, dest_new_size.x, dest_new_size.y);
             XResizeWindow(current_display, frame, dest_new_size.x, dest_new_size.y);
@@ -265,7 +273,7 @@ namespace feather
         {
             return true;
         }
-        
+
         const Window targeted = frame_list[event.window].frame;
         last_mouse_click = {event.x_root, event.y_root};
         XRaiseWindow(current_display, targeted);
@@ -281,29 +289,29 @@ namespace feather
             result = on_key_press(the_event.xkey);
             break;
         case ConfigureRequest:
-            result= create_event(the_event.xconfigurerequest);
+            result = create_event(the_event.xconfigurerequest);
             break;
         case MapRequest:
-            result= map_request_event(the_event.xmaprequest);
+            result = map_request_event(the_event.xmaprequest);
             break;
         case UnmapNotify:
-            result= unmap_request_event(the_event.xunmap);
+            result = unmap_request_event(the_event.xunmap);
             break;
         case ButtonRelease:
-            result= true;
+            result = true;
             break;
         case ConfigureNotify:
-            result= true;
+            result = true;
             break;
         case MotionNotify:
             while (XCheckTypedWindowEvent(current_display, the_event.xmotion.window, MotionNotify, &the_event))
             {
                 // skip pending operation
             }
-            result= on_motion_event(the_event.xmotion);
+            result = on_motion_event(the_event.xmotion);
             break;
         case ButtonPress:
-            result= on_button_event(the_event.xbutton);
+            result = on_button_event(the_event.xbutton);
             break;
         default:
             break;
