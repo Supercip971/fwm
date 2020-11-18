@@ -9,11 +9,13 @@
 #include <X11/keysym.h>
 
 #include <memory>
+#include <mutex>
 #include <stdlib.h>
 
 namespace feather
 {
 
+    std::mutex main_mutex;
     const char* event_string_list[] = {
         "null",
         "null",
@@ -77,6 +79,8 @@ namespace feather
         }
 
         main_window = DefaultRootWindow(current_display);
+        ftm.launch_tile_process(&frame_list);
+        window_full_screen_raw = XKeysymToKeycode(current_display, window_full_screen);
     }
 
     void fwm::setup_window_key(Window wid)
@@ -119,6 +123,14 @@ namespace feather
             false,
             GrabModeAsync,
             GrabModeAsync);
+        XGrabKey(
+            current_display,
+            XKeysymToKeycode(current_display, window_full_screen),
+            mod_code,
+            wid,
+            false,
+            GrabModeAsync,
+            GrabModeAsync);
     }
     void fwm::frame_window(Window wid)
     {
@@ -138,7 +150,9 @@ namespace feather
         XAddToSaveSet(current_display, wid);
         XReparentWindow(current_display, wid, on_top, 0, 0);
         XMapWindow(current_display, on_top);
-        frame_list[wid] = on_top;
+        frame_list[wid].frame = on_top;
+        frame_list[wid].has_changed = true;
+        frame_list[wid].w_display = current_display;
         setup_window_key(wid);
     }
     bool fwm::map_request_event(const XMapRequestEvent event)
@@ -160,7 +174,7 @@ namespace feather
         {
             return true;
         }
-        Window frame = frame_list[event.window];
+        Window frame = frame_list[event.window].frame;
         XUnmapWindow(current_display, frame);
         XReparentWindow(current_display, event.window, main_window, 0, 0);
         XRemoveFromSaveSet(current_display, event.window);
@@ -187,19 +201,37 @@ namespace feather
 
         if (frame_list.count(the_event.window))
         {
-            XConfigureWindow(current_display, frame_list[the_event.window], the_event.value_mask, &end_window);
+            XConfigureWindow(current_display, frame_list[the_event.window].frame, the_event.value_mask, &end_window);
         }
         XConfigureWindow(current_display, the_event.window, the_event.value_mask, &end_window);
         return true;
     }
 
+        bool fwm::on_key_press(const XKeyEvent& event){
+            if(event.keycode ==window_full_screen_raw){
+                context.log("event %x \n", event.keycode);
+                if(frame_list[event.window].full_screen){
+                    frame_list[event.window].full_screen = false;
+                }
+                else {
+                    frame_list[event.window].full_screen = true;
+                }
+            }else{
+
+                context.log("nevent %x \n", event.keycode);
+                context.log("nstate %x \n", event.state);
+                context.log("should %x \n", window_full_screen_raw);
+            }
+            return true;
+        }
     bool fwm::on_motion_event(const XMotionEvent &event)
     {
         if (!frame_list.count(event.window))
         {
             return true;
         }
-        const Window frame = frame_list[event.window];
+        frame_list[event.window].has_changed = true;
+        const Window frame = frame_list[event.window].frame;
         pos final = {event.x_root, event.y_root};
         final.x -= last_mouse_click.x;
         final.y -= last_mouse_click.y;
@@ -214,8 +246,8 @@ namespace feather
         {
 
             pos resize_change = {
-                std::max(final.x + last_focused_window.width, 1),
-                std::max(final.y + last_focused_window.height, 1)};
+            std::max(final.x + last_focused_window.width, 1),
+            std::max(final.y + last_focused_window.height, 1)};
             pos dest_new_size = {resize_change.x, resize_change.y};
             XResizeWindow(current_display, event.window, dest_new_size.x, dest_new_size.y);
             XResizeWindow(current_display, frame, dest_new_size.x, dest_new_size.y);
@@ -233,8 +265,8 @@ namespace feather
         {
             return true;
         }
-        const Window targeted = frame_list[event.window];
-
+        
+        const Window targeted = frame_list[event.window].frame;
         last_mouse_click = {event.x_root, event.y_root};
         XRaiseWindow(current_display, targeted);
         XGetWindowAttributes(current_display, targeted, &last_focused_window);
@@ -242,39 +274,41 @@ namespace feather
     }
     bool fwm::interpret_event(XEvent the_event)
     {
-
+        bool result = false;
         switch (the_event.type)
         {
+        case KeyPress:
+            result = on_key_press(the_event.xkey);
+            break;
         case ConfigureRequest:
-            return create_event(the_event.xconfigurerequest);
+            result= create_event(the_event.xconfigurerequest);
             break;
         case MapRequest:
-            return map_request_event(the_event.xmaprequest);
+            result= map_request_event(the_event.xmaprequest);
             break;
         case UnmapNotify:
-            return unmap_request_event(the_event.xunmap);
+            result= unmap_request_event(the_event.xunmap);
             break;
         case ButtonRelease:
-            return true;
+            result= true;
             break;
         case ConfigureNotify:
-            return true;
+            result= true;
             break;
         case MotionNotify:
             while (XCheckTypedWindowEvent(current_display, the_event.xmotion.window, MotionNotify, &the_event))
             {
                 // skip pending operation
             }
-            return on_motion_event(the_event.xmotion);
+            result= on_motion_event(the_event.xmotion);
             break;
         case ButtonPress:
-            return on_button_event(the_event.xbutton);
+            result= on_button_event(the_event.xbutton);
             break;
         default:
             break;
         }
 
-        context.generate_error("unhandled event : %s ",event_string_list[ the_event.type]);
         return true;
     }
     void fwm::init_top_window()
@@ -296,6 +330,7 @@ namespace feather
 
         XUngrabServer(current_display);
     }
+
     void fwm::run()
     {
         context.log("running FWM ... ");
@@ -309,6 +344,7 @@ namespace feather
         while (true)
         {
 
+            main_mutex.lock();
             XEvent current_event;
             XNextEvent(current_display, &current_event);
 
@@ -317,6 +353,7 @@ namespace feather
             {
                 exit();
             }
+            main_mutex.unlock();
             usleep(10);
         }
     }
@@ -351,7 +388,7 @@ namespace feather
         }
         else
         {
-            context.generate_error("unknown error while loading %i(\n", event->error_code);
+            context.generate_error("unknown error while loading %i\n", event->error_code);
             exit();
         }
         return 0;
