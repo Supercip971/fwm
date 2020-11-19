@@ -151,6 +151,8 @@ namespace feather
         XReparentWindow(current_display, wid, on_top, 0, 0);
         XMapWindow(current_display, on_top);
         frame_list[wid].frame = on_top;
+        frame_list[wid].can_be_moved = true;
+        frame_list[wid].can_be_resized = true;
         frame_list[wid].has_changed = true;
         frame_list[wid].w_display = current_display;
         setup_window_key(wid);
@@ -215,10 +217,14 @@ namespace feather
             if (frame_list[event.window].full_screen)
             {
                 frame_list[event.window].full_screen = false;
+                frame_list[event.window].can_be_resized = true;
+                frame_list[event.window].can_be_moved = true;
             }
             else
             {
                 frame_list[event.window].full_screen = true;
+                frame_list[event.window].can_be_resized = false;
+                frame_list[event.window].can_be_moved = false;
             }
 
             frame_list[event.window].has_changed = true;
@@ -245,7 +251,10 @@ namespace feather
         final.y -= last_mouse_click.y;
         if (event.state & move_button_mask)
         {
-
+            
+            if(!frame_list[event.window].can_be_moved){
+                return true;
+            }
             final.x += last_focused_window.x;
             final.y += last_focused_window.y;
             XMoveWindow(current_display, frame, final.x, final.y);
@@ -253,6 +262,9 @@ namespace feather
         else if (event.state & resize_button_mask)
         {
 
+            if(!frame_list[event.window].can_be_resized){
+                return true;
+            }
             pos resize_change = {
                 std::max(final.x + last_focused_window.width, 1),
                 std::max(final.y + last_focused_window.height, 1)};

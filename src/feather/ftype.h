@@ -11,6 +11,8 @@ namespace feather
         unsigned int depth;
         bool full_screen;
         bool has_changed;
+        bool can_be_moved;
+        bool can_be_resized;
         int on_dscreen;
         Display *w_display;
         Window frame;
