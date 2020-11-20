@@ -15,6 +15,7 @@ namespace feather
     class feather_tiling_manager
     {
     public:
+        Display *display;
         std::unordered_map<Window, fwm_winfo> *list;
         int gaps = 0;
         void launch_tile_process(std::unordered_map<Window, fwm_winfo> *list);
@@ -39,13 +40,18 @@ namespace feather
         int type;
 
     public:
+        int x;
+        int y;
+        int width;
+        int height;
         void add_window(Window w);
         void remove_window(Window w);
         void update();
-        void update(Window t, fwm_winfo *window);
+        void update(Window t, fwm_winfo *window, int id);
         void add(windows_tiling_element *y);
 
         windows_tiling_element();
         windows_tiling_element(feather_tiling_manager *parent, window_tiling_elements_type t);
+        windows_tiling_element(feather_tiling_manager *parent, window_tiling_elements_type t, int ix, int iy, int iwidth, int iheight);
     };
 }; // namespace feather

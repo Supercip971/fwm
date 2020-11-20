@@ -79,6 +79,7 @@ namespace feather
         }
 
         main_window = DefaultRootWindow(current_display);
+        ftm.display = current_display;
         ftm.launch_tile_process(&frame_list);
         window_full_screen_raw = XKeysymToKeycode(current_display, window_full_screen);
     }
@@ -139,7 +140,7 @@ namespace feather
         {
             return; // already framed
         }
-        const unsigned long BORDER_COLOR = 0xffffff;
+        const unsigned long BORDER_COLOR = 0x000000;
         const unsigned long BG_COLOR = 0x000000;
         XWindowAttributes x_attributes;
         XGetWindowAttributes(current_display, wid, &x_attributes);
@@ -223,13 +224,11 @@ namespace feather
             if (frame_list[event.window].full_screen)
             {
                 frame_list[event.window].full_screen = false;
-                frame_list[event.window].can_be_resized = true;
                 frame_list[event.window].can_be_moved = true;
             }
             else
             {
                 frame_list[event.window].full_screen = true;
-                frame_list[event.window].can_be_resized = false;
                 frame_list[event.window].can_be_moved = false;
             }
 
