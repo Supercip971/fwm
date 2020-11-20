@@ -2,12 +2,20 @@
 #include "ftype.h"
 #include <future>
 #include <mutex>
+#include <vector>
 namespace feather
 {
+    enum window_tiling_elements_type
+    {
+        WINDOW_HEIGHT,
+        WINDOW_WIDTH,
+    };
+    class windows_tiling_element;
 
     class feather_tiling_manager
     {
     public:
+        std::unordered_map<Window, fwm_winfo> *list;
         int gaps = 0;
         void launch_tile_process(std::unordered_map<Window, fwm_winfo> *list);
 
@@ -18,9 +26,26 @@ namespace feather
         }
 
     private:
+        windows_tiling_element *main_telement;
         void update(fwm_winfo *window, const Window w);
 
-        std::unordered_map<Window, fwm_winfo> *list;
         std::thread process;
+    };
+    class windows_tiling_element
+    {
+        std::vector<windows_tiling_element *> sub_elements;
+        std::vector<Window> window_list;
+        feather_tiling_manager *dad;
+        int type;
+
+    public:
+        void add_window(Window w);
+        void remove_window(Window w);
+        void update();
+        void update(Window t, fwm_winfo *window);
+        void add(windows_tiling_element *y);
+
+        windows_tiling_element();
+        windows_tiling_element(feather_tiling_manager *parent, window_tiling_elements_type t);
     };
 }; // namespace feather

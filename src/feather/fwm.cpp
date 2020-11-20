@@ -155,6 +155,12 @@ namespace feather
         frame_list[wid].can_be_resized = true;
         frame_list[wid].has_changed = true;
         frame_list[wid].w_display = current_display;
+        frame_list[wid].created = true;
+
+        frame_list[wid].next_x = x_attributes.x;
+        frame_list[wid].next_y = x_attributes.y;
+        frame_list[wid].next_width = x_attributes.width;
+        frame_list[wid].next_height = x_attributes.height;
         setup_window_key(wid);
     }
     bool fwm::map_request_event(const XMapRequestEvent event)
@@ -251,26 +257,33 @@ namespace feather
         final.y -= last_mouse_click.y;
         if (event.state & move_button_mask)
         {
-            
-            if(!frame_list[event.window].can_be_moved){
+
+            if (!frame_list[event.window].can_be_moved)
+            {
                 return true;
             }
             final.x += last_focused_window.x;
             final.y += last_focused_window.y;
-            XMoveWindow(current_display, frame, final.x, final.y);
+            frame_list[event.window].next_x = final.x;
+            frame_list[event.window].next_y = final.y;
+            //     XMoveWindow(current_display, frame, final.x, final.y);
         }
         else if (event.state & resize_button_mask)
         {
 
-            if(!frame_list[event.window].can_be_resized){
+            if (!frame_list[event.window].can_be_resized)
+            {
                 return true;
             }
             pos resize_change = {
                 std::max(final.x + last_focused_window.width, 1),
                 std::max(final.y + last_focused_window.height, 1)};
             pos dest_new_size = {resize_change.x, resize_change.y};
-            XResizeWindow(current_display, event.window, dest_new_size.x, dest_new_size.y);
-            XResizeWindow(current_display, frame, dest_new_size.x, dest_new_size.y);
+
+            frame_list[event.window].next_width = resize_change.x;
+            frame_list[event.window].next_height = resize_change.y;
+            //       XResizeWindow(current_display, event.window, dest_new_size.x, dest_new_size.y);
+            //       XResizeWindow(current_display, frame, dest_new_size.x, dest_new_size.y);
         }
         else
         {

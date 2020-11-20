@@ -8,6 +8,7 @@ namespace feather
 
     struct fwm_winfo
     {
+        bool created;
         unsigned int depth;
         bool full_screen;
         bool has_changed;
@@ -16,5 +17,9 @@ namespace feather
         int on_dscreen;
         Display *w_display;
         Window frame;
+        unsigned int next_x = 0;
+        unsigned int next_y = 0;
+        unsigned int next_width = 0;
+        unsigned int next_height = 0;
     };
 } // namespace feather
