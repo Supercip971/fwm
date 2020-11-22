@@ -74,7 +74,7 @@ namespace feather
     void json_value::detect_type()
     {
         type = JSON_NULL;
-        for (int i = 0; i < strlen(vdata); i++)
+        for (size_t i = 0; i < strlen(vdata); i++)
         {
             if (vdata[i] == '"')
             {
@@ -139,7 +139,7 @@ namespace feather
     json_storage &json_storage::operator[](const char *name)
     {
 
-        for (int i = 0; i < sub_storage.size(); i++)
+        for (size_t i = 0; i < sub_storage.size(); i++)
         {
             if (sub_storage[i]->storage_name != nullptr)
             {
@@ -170,7 +170,8 @@ namespace feather
         current_storage->parent = nullptr;
         current_storage->storage_name = nullptr;
         current_storage->sub_storage.clear();
-        char *current_var_name = "main";
+        const char *default_name = "main";
+        char *current_var_name = (char *)default_name;
         char *current_var_value;
         size_t json_length = higher_storage.size();
         for (size_t i = 0; i < json_length; i++)

@@ -18,7 +18,7 @@ namespace feather
     }
     void windows_tiling_element::remove_window(Window w)
     {
-        for (int i = 0; i < window_list.size(); i++)
+        for (size_t i = 0; i < window_list.size(); i++)
         {
             if (window_list[i] == w)
             {
@@ -29,12 +29,12 @@ namespace feather
     }
     void windows_tiling_element::update()
     {
-        for (int i = 0; i < sub_elements.size(); i++)
+        for (size_t i = 0; i < sub_elements.size(); i++)
         {
             sub_elements[i]->update();
         }
         bool has_one_changed = false;
-        for (int i = 0; i < window_list.size(); i++)
+        for (size_t i = 0; i < window_list.size(); i++)
         {
             fwm_winfo *d = &dad->list->at(window_list[i]);
             if (d->has_changed)
@@ -47,7 +47,7 @@ namespace feather
         {
             return;
         }
-        for (int i = 0; i < window_list.size(); i++)
+        for (size_t i = 0; i < window_list.size(); i++)
         {
             fwm_winfo *d = &dad->list->at(window_list[i]);
             update(window_list[i], d, i);

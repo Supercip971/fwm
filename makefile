@@ -7,7 +7,7 @@ LIBX11_PATH := /usr/lib/libX11.so
 OUTPUT := "./build/fwm"
 %.o: %.cpp $(CFILES) $(HFILES)
 	@echo "[ C++] building $< "
-	@g++ -c -pthread -fpermissive -fsanitize=address -fsanitize=undefined -std=c++20 -m64 -Wall -g -march=x86-64 -I src/ -O3 -msse -o $@ $<
+	@g++ -c -pthread -fpermissive -fsanitize=address -Wall -Werror -fsanitize=undefined -std=c++20 -m64 -Wall -g -march=x86-64 -I src/ -O3 -msse -mavx -o $@ $<
 
 $(OUTPUT): $(OBJFILES)
 	@echo "all"

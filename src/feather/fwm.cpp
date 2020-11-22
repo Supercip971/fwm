@@ -250,7 +250,6 @@ namespace feather
             return true;
         }
         frame_list[event.window].has_changed = true;
-        const Window frame = frame_list[event.window].frame;
         pos final = {event.x_root, event.y_root};
         final.x -= last_mouse_click.x;
         final.y -= last_mouse_click.y;
@@ -277,7 +276,6 @@ namespace feather
             pos resize_change = {
                 std::max(final.x + last_focused_window.width, 1),
                 std::max(final.y + last_focused_window.height, 1)};
-            pos dest_new_size = {resize_change.x, resize_change.y};
 
             frame_list[event.window].next_width = resize_change.x;
             frame_list[event.window].next_height = resize_change.y;
@@ -340,8 +338,8 @@ namespace feather
         default:
             break;
         }
-
-        return true;
+        result = true;
+        return result;
     }
     void fwm::init_top_window()
     {
@@ -354,7 +352,7 @@ namespace feather
         XQueryTree(current_display, main_window, &returned_root, &returned_parent, &top_level_windows, &number_of_top_windows);
         context.log("top window count %i", number_of_top_windows);
 
-        for (int i = 0; i < number_of_top_windows; i++)
+        for (size_t i = 0; i < number_of_top_windows; i++)
         {
             frame_window(top_level_windows[i]);
         }
