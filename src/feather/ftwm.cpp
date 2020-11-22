@@ -85,23 +85,59 @@ namespace feather
         if (window->full_screen == true)
         {
             //   XMoveWindow(window->w_display, window->frame, window->next_x, window->next_y);
-            const int count = window_list.size() + sub_elements.size();
+            int count = window_list.size() + sub_elements.size();
+            if(id > count){
+                count = id + 1;
+            }
+            int last_x = this->x;
+            int last_y = this->y;
+            for (int i = 0; i < id; i++)
+            {
+                fwm_winfo *d = &dad->list->at(window_list[i]);
 
+                last_x += this->width / count;
+                last_x += d->add_size;
+                last_y += this->height / count;
+                last_y += d->add_size;
+            }
             if (type == WINDOW_HEIGHT)
             {
-                const unsigned int fy = (this->height / count) * id;
+                unsigned int fheight = (this->height / count) + window->add_size;
+                if (window->next_height != fheight)
+                {
+                    if (window_list.size() > (size_t)id + 1)
+                    {
+
+                        window->add_size = window->next_height - (this->height / count);
+                        fheight = (this->height / count) + window->add_size;
+                        fwm_winfo *d = &dad->list->at(window_list[id + 1]);
+                        d->add_size = -window->add_size;
+                    }
+                }
+                const unsigned int fy = last_y;
                 const unsigned int fx = this->x;
                 const unsigned int fwidth = this->width;
-                const unsigned int fheight = this->height / count;
                 XMoveWindow(window->w_display, window->frame, fx, fy);
                 XResizeWindow(window->w_display, window->frame, fwidth, fheight);
                 XResizeWindow(window->w_display, t, fwidth, fheight);
             }
             else if (type == WINDOW_WIDTH)
             {
-                const unsigned int fx = (this->width / count) * id;
+                unsigned int fwidth = (this->width / count) + window->add_size;
+                if (window->next_width != fwidth)
+                {
+                    if (window_list.size() > (size_t)id + 1)
+                    {
+
+                        window->add_size = window->next_width - (this->width / count);
+                        fwidth = (this->width / count) + window->add_size;
+                        fwm_winfo *d = &dad->list->at(window_list[id + 1]);
+                        d->add_size = -window->add_size;
+                    }
+                }
+
+                const unsigned int fx = last_x;
                 const unsigned int fy = this->y;
-                const unsigned int fwidth = this->width / count;
                 const unsigned int fheight = this->height;
                 XMoveWindow(window->w_display, window->frame, fx, fy);
                 XResizeWindow(window->w_display, window->frame, fwidth, fheight);

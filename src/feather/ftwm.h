@@ -37,7 +37,7 @@ namespace feather
         std::vector<windows_tiling_element *> sub_elements;
         std::vector<Window> window_list;
         feather_tiling_manager *dad;
-        int type;
+        int type = WINDOW_HEIGHT;
 
     public:
         int x;

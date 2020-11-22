@@ -17,9 +17,14 @@ namespace feather
         int on_dscreen;
         Display *w_display;
         Window frame;
+
         unsigned int next_x = 0;
         unsigned int next_y = 0;
         unsigned int next_width = 0;
         unsigned int next_height = 0;
+
+        int add_pos = 0;
+
+        int add_size = 0;
     };
 } // namespace feather
