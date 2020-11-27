@@ -2,8 +2,8 @@
 
 exec xeyes &
 
-sleep 2 && xterm &
-
+sleep 1 && xterm &
+sleep 1 && xterm & 
 exec ~/fwm/build/fwm 
 
 
