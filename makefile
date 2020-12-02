@@ -1,13 +1,18 @@
 
 CFILES := $(shell find src -type f -name \*.cpp)
+CCFILES := $(shell find src -type f -name \*.c)
 HFILES := $(shell find src -type f -name \*.h)
-TST_FILES := $(shell find test -type f)
-OBJFILES := $(patsubst %.cpp, %.o, $(CFILES))
+
+OBJFILES := $(patsubst %.cpp, %.o, $(CFILES)) $(patsubst %.c, %.o, $(CCFILES))
 LIBX11_PATH := /usr/lib/libX11.so
 OUTPUT := "./build/fwm"
 %.o: %.cpp $(CFILES) $(HFILES)
 	@echo "[ C++] building $< "
 	@g++ -c -pthread -fpermissive -fsanitize=address -Wall -Werror -fsanitize=undefined -std=c++20 -m64 -Wall -g -march=x86-64 -I src/ -O3 -msse -mavx -o $@ $<
+%.o: %.c $(CCFILES) $(HFILES)
+	@echo "[ C ] building $<"
+	@gcc -c -pthread -Wall -Werror -m64 -Wall -g -march=x86-64 -I src/ -O3 -msse -mavx -o $@ $<
+
 
 $(OUTPUT): $(OBJFILES)
 	@echo "all"
