@@ -10,11 +10,13 @@ namespace feather
 {
 
     constexpr unsigned int version = 0;
+
     constexpr unsigned int subversion = 1;
     class gcontext
     {
         FILE *output = nullptr;
-
+        char* programm_path = nullptr;
+        unsigned int current_offset = 0;
     public:
         bool error = false;
         const char *last_error;
@@ -45,11 +47,11 @@ namespace feather
             char *target = new char[strlen(message) + 128];
             vsprintf(target, message, vl);
 
+
             fprintf(output, "\033[1;36m[ FWM ]\033[0m %s  \n",
                     target);
             printf("\033[1;36m[ FWM ]\033[0m %s  \n",
                    target);
-
             va_end(vl);
             delete[] target;
         }
@@ -57,7 +59,17 @@ namespace feather
         {
             fclose(output);
         }
+
+        char* get_current_path(){
+            return programm_path;
+        }
+        void set_current_path(const char* path){
+            printf("setting path : %s \n", path);
+            programm_path = new char[strlen(path)+2];
+            memcpy(programm_path, path, strlen(path)+1);
+            programm_path[strlen(path)+1] = 0;
+        }
     };
 
-    static gcontext context;
+    extern gcontext context;
 } // namespace feather

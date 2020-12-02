@@ -1,8 +1,14 @@
 #include "feather/fwm.h"
 #include "feather/json_parser.h"
 #include "feather/utility.h"
-int main()
-{
+#include <libgen.h>
+#include "feather/feather_wren_integration.h"
+int main(int argc, char* argv[])
+{dirname(argv[0]);
+    feather::context.set_current_path(argv[0]);
+    printf("running from %s \n", argv[0]);
+    fwren_init_system();
+
     feather::json_data j = feather::json_data();
     j.from_file("build/feather_script.json");
     printf("%s", j.get_storage()["main"]["fwm_key"]["mod"].get_value().get_as<std::string>().c_str());
