@@ -80,25 +80,45 @@ namespace feather
         dad = parent;
         type = (int)t;
     }
+    fwm_winfo* windows_tiling_element::get_next_fullscreen_window(int id){
+        id++;
+        while(window_list.size() > (size_t)id){
+            fwm_winfo *d = &dad->list->at(window_list[id]);
+            if(d->full_screen){
+                return d;
+            }
+            id++;
+        }
+        return nullptr;
+    }
     void windows_tiling_element::update(Window t, fwm_winfo *window, int id)
     {
+
         if (window->full_screen == true)
         {
-            //   XMoveWindow(window->w_display, window->frame, window->next_x, window->next_y);
-            int count = window_list.size() + sub_elements.size();
-            if(id > count){
-                count = id + 1;
+            int count = sub_elements.size();
+            for(size_t i = 0; i < window_list.size(); i++){
+                if(dad->list->at(window_list[i]).full_screen){
+                    count++;
+                }
             }
+            if(count == 0){
+                count = 1;
+            }
+            //   XMoveWindow(window->w_display, window->frame, window->next_x, window->next_y);
             int last_x = this->x;
             int last_y = this->y;
             for (int i = 0; i < id; i++)
             {
-                fwm_winfo *d = &dad->list->at(window_list[i]);
 
-                last_x += this->width / count;
-                last_x += d->add_size;
-                last_y += this->height / count;
-                last_y += d->add_size;
+                fwm_winfo *d = &dad->list->at(window_list[i]);
+                if(d->full_screen){
+                    last_x += this->width / count;
+                    last_x += d->add_size;
+                    last_y += this->height / count;
+                    last_y += d->add_size;
+
+                }
             }
             if (type == WINDOW_HEIGHT)
             {
@@ -110,8 +130,10 @@ namespace feather
 
                         window->add_size = window->next_height - (this->height / count);
                         fheight = (this->height / count) + window->add_size;
-                        fwm_winfo *d = &dad->list->at(window_list[id + 1]);
-                        d->add_size = -window->add_size;
+                        fwm_winfo* nfo = get_next_fullscreen_window(id);
+                        if(nfo != nullptr){
+                            nfo->add_size = -window->add_size;
+                        }
                     }
                 }
                 const unsigned int fy = last_y;
@@ -131,8 +153,10 @@ namespace feather
 
                         window->add_size = window->next_width - (this->width / count);
                         fwidth = (this->width / count) + window->add_size;
-                        fwm_winfo *d = &dad->list->at(window_list[id + 1]);
-                        d->add_size = -window->add_size;
+                        fwm_winfo* nfo = get_next_fullscreen_window(id);
+                        if(nfo != nullptr){
+                            nfo->add_size = -window->add_size;
+                        }
                     }
                 }
 

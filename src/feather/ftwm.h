@@ -46,6 +46,7 @@ namespace feather
         int height;
         void add_window(Window w);
         void remove_window(Window w);
+        fwm_winfo* get_next_fullscreen_window(int id);
         void update();
         void update(Window t, fwm_winfo *window, int id);
         void add(windows_tiling_element *y);
