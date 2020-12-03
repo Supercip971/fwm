@@ -19,6 +19,8 @@ struct fwren_class{
 
 };
 
-void fwren_load(const char* file_path, WrenVM* vm);
+int fwren_load(const char* file_path, WrenVM* vm);
 void fwren_init_system();
+
+
 #endif // FEATHER_WREN_INTEGRATION_H

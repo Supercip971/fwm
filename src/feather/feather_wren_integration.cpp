@@ -9,6 +9,7 @@
 #include "wren.h"
 #include "wren/vm/wren_common.h"
 #include "wren/vm/wren_core.h"
+#include <map>
 static void writeFn(WrenVM* vm, const char* text)
 {
   printf("[WREN] %s", text);
@@ -22,6 +23,7 @@ void errorFn(WrenVM* vm, WrenErrorType errorType,
   {
     case WREN_ERROR_COMPILE:
     {
+
       printf("[WREN] [%s line %d] [Error] %s\n", module, line, msg);
     } break;
     case WREN_ERROR_STACK_TRACE:
@@ -131,13 +133,16 @@ WrenVM* init_feather_wren(){
     return vm;
 }
 
-void fwren_load(const char* file_path, WrenVM* vm){
-    wrenInterpret(vm, "main",load_module(vm, file_path));
+int fwren_load(const char* file_path, WrenVM* vm){
+    return wrenInterpret(vm, "main",load_module(vm, file_path));
 }
+
 void fwren_init_system(){
 
     WrenVM* finit_vm = init_feather_wren();
-    fwren_load("finit.wren",finit_vm);
+    if(fwren_load("finit.wren",finit_vm) != WREN_RESULT_SUCCESS){
+        return;
+    };
 
     wrenEnsureSlots(finit_vm, 1);
 
@@ -151,3 +156,6 @@ void fwren_init_system(){
     wrenCall(finit_vm,handle);
 
 }
+
+
+
