@@ -3,6 +3,11 @@
 #include "wren.h"
 #include <vector>
 #include <map>
+#include "json.h"
+
+using json = nlohmann::json;
+
+extern json main_settings;
 WrenVM* init_feather_wren();
 struct fwren_func{
     WrenForeignMethodFn fwren;
